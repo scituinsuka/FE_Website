@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "totalPages": 1,
+      "totalItems": 1
+    }
+  },
+  "data": [
+    {
+      "id": "uuid v7",
+      "title": "Judul Projek",
+      "description": "Deskripsi singkat projek",
+      "imageUrl": "s3 or file server.jpg",
+      "slug": ""
+    }
+  ]
+}

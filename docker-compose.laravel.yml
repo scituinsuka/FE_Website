@@ -1,0 +1,30 @@
+services:
+  laravel:
+    build: .
+    container_name: scit-laravel
+    restart: unless-stopped
+    networks:
+      - scit-net
+
+  mysql:
+    image: mysql:8
+    container_name: scit-mysql
+    env_file:
+      - ./.env.prod
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - scit-net
+
+  redis:
+    image: redis:7
+    container_name: scit-redis
+    networks:
+      - scit-net
+
+networks:
+  scit-net:
+    external: true
+
+volumes:
+  db_data:
