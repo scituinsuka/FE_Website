@@ -1,93 +1,94 @@
 /**
- * Represent the successful case of a {@link TryCatch} tuple.
+ * Merepresentasikan kasus sukses dari tuple {@link TryCatch}.
  *
- * @typeParam R - The type of the result.
+ * @typeParam R - Tipe dari hasil yang dikembalikan.
  */
 type Ok<R> = [result: R, err: null];
 
 /**
- * Represent the error case of a {@link TryCatch} tuple.
+ * Merepresentasikan kasus error dari tuple {@link TryCatch}.
  */
 type Err = [result: unknown, err: ThrownError];
 
 /**
- * TryCatch represents the return value of the {@link $trycatch} utility. It is
- * composed of a tuple where the first element is the resulting value and the
- * second element is the caught error. The result element will be typed as
- * "unknown" until the absence of an error is asserted in the control flow,
- * Type narrowing will then unveil the actual type of the result. This ensures
- * that the presence of a value is always tied to the absence of an error, and
- * vice versa. The caught error is always encapsulated in an {@link ThrownError}
- * object and is available in the "cause" property.
+ * TryCatch merepresentasikan nilai kembalian dari utility {@link $trycatch}. Ini
+ * terdiri dari tuple dimana elemen pertama adalah nilai hasil dan elemen
+ * kedua adalah error yang tertangkap. Elemen hasil akan bertipe "unknown"
+ * sampai ketiadaan error dipastikan dalam control flow. Type narrowing kemudian
+ * akan mengungkap tipe sebenarnya dari hasil. Ini memastikan bahwa keberadaan
+ * nilai selalu terikat dengan ketiadaan error, dan sebaliknya. Error yang
+ * tertangkap selalu dikapsulasi dalam objek {@link ThrownError} dan tersedia
+ * dalam properti "cause".
  *
- * @typeParam R - The return type of the task.
+ * @typeParam R - Tipe kembalian dari task.
  */
 type TryCatch<R> = Ok<R> | Err;
 
 /**
- * Wraps a synchronous task in a try-catch block and returns the resulting
- * {@link TryCatch} tuple.
+ * Membungkus task sinkron dalam blok try-catch dan mengembalikan tuple
+ * {@link TryCatch} yang dihasilkan.
  *
- * @param task - A synchronous task.
- * @returns The resulting {@link TryCatch} tuple.
+ * @param task - Task sinkron.
+ * @returns Tuple {@link TryCatch} yang dihasilkan.
  */
-// TODO: This is here just for the sake of having a completely typed API, useful
-// when some is prototyping or testing this library type system and pass a
-// function that alway throw and never return. If someone knows how to integrate
-// this into the main overload we can remove it. The main reason to remove it
-// shows up as an overload when hovering the function in an IDE.
+// TODO: Ini ada di sini hanya untuk keperluan memiliki API yang sepenuhnya typed,
+// berguna ketika seseorang sedang prototyping atau testing sistem tipe library ini
+// dan melewatkan fungsi yang selalu throw dan tidak pernah return. Jika ada yang
+// tahu bagaimana mengintegrasikan ini ke overload utama, kita bisa menghapusnya.
+// Alasan utama untuk menghapusnya adalah muncul sebagai overload ketika hover
+// fungsi di IDE.
 export function $trycatch(task: () => never): TryCatch<never>;
 
 /**
- * Wraps an asynchronous task in a try-catch block and returns a promise that
- * resolves with the resulting {@link TryCatch} tuple.
+ * Membungkus task asinkron dalam blok try-catch dan mengembalikan promise yang
+ * resolve dengan tuple {@link TryCatch} yang dihasilkan.
  *
- * @param task - An asynchronous task.
- * @returns The promise that resolves with the resulting {@link TryCatch} tuple.
- * @typeParam R - The return type of the task.
+ * @param task - Task asinkron.
+ * @returns Promise yang resolve dengan tuple {@link TryCatch} yang dihasilkan.
+ * @typeParam R - Tipe kembalian dari task.
  */
 export function $trycatch<R>(task: () => Promise<R>): Promise<TryCatch<R>>;
 
 /**
- * Wraps a synchronous functional task in a try-catch block and returns its
- * {@link TryCatch}.
+ * Membungkus task fungsional sinkron dalam blok try-catch dan mengembalikan
+ * {@link TryCatch}-nya.
  *
- * @param task - A synchronous functional task.
- * @returns The task {@link TryCatch}.
- * @typeParam R - The return type of the task.
+ * @param task - Task fungsional sinkron.
+ * @returns {@link TryCatch} dari task.
+ * @typeParam R - Tipe kembalian dari task.
  */
 export function $trycatch<R>(task: () => R): TryCatch<R>;
 
 /**
- * Chains a promise task with then/catch and return a promise that resolves
- * with the resulting {@link TryCatch} tuple.
+ * Menghubungkan promise task dengan then/catch dan mengembalikan promise yang
+ * resolve dengan tuple {@link TryCatch} yang dihasilkan.
  *
- * @param task - A promise task.
- * @returns The promise that resolves with the resulting {@link TryCatch} tuple.
- * @typeParam R - The return type of the task.
+ * @param task - Promise task.
+ * @returns Promise yang resolve dengan tuple {@link TryCatch} yang dihasilkan.
+ * @typeParam R - Tipe kembalian dari task.
  */
 export function $trycatch<R>(task: Promise<R>): Promise<TryCatch<R>>;
 
 /**
- * Wraps a task in a try-catch block, or chains a promise task with then/catch,
- * and returns the resulting {@link TryCatch} tuple.
+ * Membungkus task dalam blok try-catch, atau menghubungkan promise task dengan
+ * then/catch, dan mengembalikan tuple {@link TryCatch} yang dihasilkan.
  *
- * @param task - A task to wrap in a try-catch block.
- * @returns The resulting {@link TryCatch} tuple or a promise that resolves with
- * the resulting {@link TryCatch} tuple.
- * @typeParam R - The return type of the task.
+ * @param task - Task untuk dibungkus dalam blok try-catch.
+ * @returns Tuple {@link TryCatch} yang dihasilkan atau promise yang resolve
+ * dengan tuple {@link TryCatch} yang dihasilkan.
+ * @typeParam R - Tipe kembalian dari task.
  */
 export function $trycatch<R>(task: (() => R) | Promise<R> | (() => Promise<R>)): Promise<TryCatch<R>> | TryCatch<R> {
   if (task instanceof Promise) {
-    // Generate a promise that resolves to the TryCatch tuple.
+    // Menghasilkan promise yang resolve ke tuple TryCatch.
     return task.then(ok).catch(err);
   }
 
   try {
-    // Execute the task and get its result.
+    // Eksekusi task dan dapatkan hasilnya.
     const maybePromiseResult = task();
     if (maybePromiseResult instanceof Promise) {
-      // Generate a promise that resolves to the result of the task.
+      // Menghasilkan promise yang resolve ke hasil dari task.
       return maybePromiseResult.then(ok).catch(err);
     }
 
@@ -98,36 +99,36 @@ export function $trycatch<R>(task: (() => R) | Promise<R> | (() => Promise<R>)):
 }
 
 /**
- * Create an {@link Ok} tuple with the given result.
+ * Membuat tuple {@link Ok} dengan hasil yang diberikan.
  *
- * @param result - The result to wrap.
- * @returns An {@link Ok} tuple.
- * @typeParam R - The type of the result.
+ * @param result - Hasil yang akan dibungkus.
+ * @returns Tuple {@link Ok}.
+ * @typeParam R - Tipe dari hasil.
  */
 const ok = <R>(result: R): Ok<R> => [result, null];
 
 /**
- * Create an {@link Err} tuple with the given thrown value.
+ * Membuat tuple {@link Err} dengan nilai thrown yang diberikan.
  *
- * @param thrown - The thrown value to wrap.
- * @returns An {@link Err} tuple.
+ * @param thrown - Nilai thrown yang akan dibungkus.
+ * @returns Tuple {@link Err}.
  */
 const err = (thrown: unknown): Err => [null, new ThrownError(thrown)];
 
 /**
- * Encapsulates a thrown value in an error object.
+ * Mengkapsulasi nilai thrown dalam objek error.
  */
 export class ThrownError extends Error {
   /**
-   * Creates a new error with the given cause.
+   * Membuat error baru dengan cause yang diberikan.
    *
-   * @param cause - The cause of the error.
+   * @param cause - Penyebab dari error.
    */
   public constructor(cause: unknown) {
     super("thrown error", { cause });
-    // Manually set the cause as a property for backward compatibility.
+    // Secara manual set cause sebagai property untuk backward compatibility.
     this.cause = cause;
-    // Capture the stack trace.
+    // Capture stack trace.
     if (Error.captureStackTrace) Error.captureStackTrace(this, ThrownError);
   }
 }
